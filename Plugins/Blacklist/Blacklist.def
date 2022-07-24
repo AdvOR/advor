@@ -1,0 +1,8 @@
+LIBRARY Blacklist
+EXPORTS AdvTor_InitPlugin
+EXPORTS AdvTor_UnloadPlugin
+EXPORTS AdvTor_RouterChanged
+EXPORTS AdvTor_GetConfigurationWindow
+EXPORTS AdvTor_TranslateAddress
+EXPORTS AdvTor_LanguageChange
+EXPORTS ResizeConfigurationWindow

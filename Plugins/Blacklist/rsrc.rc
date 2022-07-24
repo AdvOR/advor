@@ -1,0 +1,33 @@
+#include	"\masm32\include\resource.h"
+
+1000 DIALOGEX MOVEABLE PURE LOADONCALL DISCARDABLE	84, 0, 288, 252, 0
+STYLE 0x0004 | DS_NOFAILCREATE | DS_CONTROL | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_VISIBLE | WS_CHILD
+EXSTYLE 
+FONT 8, "Arial", 700, 0 /*FALSE*/
+BEGIN
+    RTEXT           "Blacklist URL:", 10, 	5,6,53,9, SS_LEFT, , 0
+    CONTROL         "", 300, "Combobox", CBS_DROPDOWN |CBS_AUTOHSCROLL| WS_VSCROLL | WS_TABSTOP, 	62,5,168,94, , 0
+    PUSHBUTTON      "Download", 1, 	234,5,51,12, 0, , 0
+    LTEXT           "Blacklist downloads use your Internet Explorer proxy settings.", 11, 	62,24,221,10, SS_LEFT, , 0
+    CONTROL         "Verify all routers when they are updated / downloaded", 400, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 	8,40,275,10, , 0
+    CONTROL         "Show a warning when a blacklisted router is found", 401, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 	28,53,255,10, , 0
+    CONTROL         "Automatically ban routers that are found in blacklist", 402, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 	28,66,255,10, , 0
+    CONTROL         "Verify all addresses of websites and other servers", 403, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 	8,79,275,10, , 0
+    CONTROL         "Show a warning when a blacklisted website is found", 404, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 	28,93,255,9, , 0
+    CONTROL         "Disallow access to blacklisted websites", 405, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 	28,106,255,9, , 0
+    CONTROL         "Block access to blacklisted websites", 500, "Button", BS_AUTORADIOBUTTON, 	46,119,237,10, , 0
+    CONTROL         "Send back a page explaining why a website is banned", 501, "Button", BS_AUTORADIOBUTTON, 	46,132,237,10, , 0
+    GROUPBOX        "Status", 50, 	4,148,282,66, 0, , 0
+    RTEXT           "Total number of blacklisted IPs and IP ranges:", 20, 	19,162,183,9, SS_LEFT, , 0
+    LTEXT           "", 30, 	208,162,40,9, SS_LEFT, , 0
+    RTEXT           "Total number of warnings shown in debug:", 21, 	19,174,183,9, SS_LEFT, , 0
+    LTEXT           "", 31, 	208,174,40,9, SS_LEFT, , 0
+    RTEXT           "Blacklisted routers that were banned:", 22, 	19,187,183,9, SS_LEFT, , 0
+    LTEXT           "", 32, 	208,187,40,9, SS_LEFT, , 0
+    RTEXT           "Blacklisted websites that were blocked:", 23, 	19,199,183,10, SS_LEFT, , 0
+    LTEXT           "", 33, 	208,199,40,10, SS_LEFT, , 0
+    GROUPBOX        "Verify if an IP or IP range is blacklisted", 51, 	2,217,285,32, 0, , 0
+    EDITTEXT        100, 	9,231,216,12, ES_AUTOHSCROLL | ES_LEFT, , 0
+    PUSHBUTTON      "Search", 3, 	231,230,50,15, 0, , 0
+    CTEXT           "The file blacklist.txt was not found.\nTo be able to use this plugin you must download a blacklist.", 24, 	4,40,279,209, SS_LEFT, , 0
+END

@@ -1,0 +1,21 @@
+2013-11-26 Blacklist v1.04
+
+- corrected: the number of downloaded bytes was not shown unless a language file was loaded
+- a default URL was included for the "Primary threats" blacklist from iblocklist.com (it can be selected from the URL history combo box)
+
+2011-07-22 Blacklist v1.03
+
+- added support for scroll bars (requires AdvOR 0.3.0.1+)
+
+2011-05-12 Blacklist v1.02
+
+- added multi-language support (requires AdvOR 0.2.0.13+)
+
+2011-05-06 Blacklist v1.01
+
+- added support for gzipped blacklists (requires AdvOR 0.2.0.12+)
+
+2011-01-15 Blacklist v1.00
+
+- the function InternetOpen is now called with a string for User-Agent because some antiviruses "detect" blacklist.dll as malware if the User-Agent is not set (Emsisoft 5.1.0.1, Ikarus T3.1.1.97.0, McAfee 5.400.0.1158, McAfee-GW-Edition 2010.1C, Rising 22.82.04.04 source: http://www.virustotal.com/file-scan/report.html?id=2fe3c73b8e5658f0ea7c6aafac4b3bc9b2c287122140e2473327f5abee403906-1295051356).
+- the procedure that downloads a new blacklist now obtains the pointer to InternetReadFile using GetProcAddress because Avira "detects" it as malware if it doesn't do so.

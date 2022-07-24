@@ -1,0 +1,4 @@
+LIBRARY HiddenMessage
+EXPORTS AdvTor_InitPlugin
+EXPORTS AdvTor_UnloadPlugin
+EXPORTS HiddenService_HandleRead

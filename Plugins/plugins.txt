@@ -1,0 +1,918 @@
+
+		1. Functions that are called by AdvTor if the plugin exports them
+
+
+	1.1. int __stdcall AdvTor_InitPlugin(HANDLE plugin_instance,DWORD version,char *plugin_description,void *function_table);
+
+	plugin_instance = a handler for current plugin instance that is required by some function calls
+	version = current version of AdvTor
+		LOWORD(version) = minor version
+		HIWORD(version) = major version
+	plugin_description = a buffer of 256 bytes that receives a string specifying plugin description (UTF-8)
+	function_table = a pointer to an array of functions that can be called by this plugin, for more information see plugins.h
+
+	Return values:
+		0 = initialization failed and the plugin cannot be loaded at this time
+		1 = initialization was successfull
+
+	This is the first function that is called by AdvTor after loading a plugin DLL and it is the only function that is required to load it. If the function is not exported, AdvTor will not load this plugin and will not show it in plugin list.
+
+
+
+	1.2. int __stdcall AdvTor_UnloadPlugin(int reason);
+
+	reason = an integer which can have one of the following values:
+		PLUGIN_UNLOAD_ON_DEMAND  = the user clicked the "Unload" button
+			return values:
+				0 = the plugin cannot be unloaded at this time; the user will see a MessageBox with a warning and he can choose to unload it anyway (in this case, AdvTor_UnloadPlugin will be called again with PLUGIN_UNLOAD_MUST_UNLOAD) or to cancel unloading (in this case, AdvTor_UnloadPlugin will be called again with PLUGIN_UNLOAD_CANCEL)
+				1 = the plugin can be unloaded and FreeLibrary will be called
+		PLUGIN_UNLOAD_RELOAD = the user clicked "Reload"
+			return values:
+				0 = the plugin cannot be reloaded at this time
+				1 = the plugin can be unloaded and FreeLibrary will be called
+				-1 = the plugin cannot be unloaded, but AdvTor_InitPlugin will be called again and AdvTor_GetConfigurationWindow if available
+		PLUGIN_UNLOAD_AT_EXIT = AdvTor is about to exit
+			return values:
+				0 = the plugin cannot be unloaded at this time; the user will see a MessageBox with a warning and he can choose to unload it anyway (in this case, AdvTor_UnloadPlugin will be called again with PLUGIN_UNLOAD_MUST_UNLOAD) or to cancel unloading (in this case, AdvTor_UnloadPlugin will be called again with PLUGIN_UNLOAD_CANCEL)
+				1 = the plugin can be unloaded and FreeLibrary will be called
+		PLUGIN_UNLOAD_MUST_UNLOAD = the user selected the option to unload the plugin anyway and FreeLibrary will be called
+			no return values
+		PLUGIN_UNLOAD_CANCEL = unloading this plugin was canceled by user
+			no return values
+
+	This function is called before unloading the library or when the user cancels unloading this plugin.
+
+
+
+	1.3. HWND __stdcall AdvTor_GetConfigurationWindow(HWND hParent);
+
+	hParent = window handle for AdvTor main window
+
+	Return values:
+		- a handle of a child window that can be added as a separate AdvTor page
+
+	If this function is exported, AdvTor will add a new option for this plugin's window and will call it to get a window handle that can be shown as a separate page with configuration options related to this plugin. This function is only called when the user clicks on the option related to this plugin to see the options for the first time after the plugin was (re)initialized. The size and visibility of this window are controlled by AdvTor. The plugin must not create the configuration window before this function is called. The plugin must destroy this window when the plugin will be unloaded. If AdvTor_UnloadPlugin is not exported, this window will be destroyed before calling FreeLibrary to unload the plugin.
+	The following dialog template can be used:
+		ConfigDialog DIALOGEX MOVEABLE 84,0,288,252,0
+		STYLE WS_CHILDWINDOW | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | DS_CONTROL | DS_SETFONT | DS_3DLOOK | DS_NOFAILCREATE | WS_CHILD
+		EXSTYLE WS_EX_CONTROLPARENT
+		FONT 8,"Arial",700,0
+		BEGIN
+		END
+
+
+	1.3.1.	resize_info_t* __stdcall ResizeConfigurationWindow(RECT newSize);
+
+	newSize = a rectangle that has x-coordinate (newSize.left), y-coordinate (newSize.top), new width (newSize.right) and new height (newSize.bottom) for configuration window
+
+	Return values:
+		- an array of resize_info_t structures that will be used to resize or move dialog items to fit the new window dimensions; the last structure must have ctrlId=0
+		- NULL if the plugin handles WM_SIZE events
+
+	If this function is exported, it is called before the configuration window is resized. Using -1 for for the first reference.left value will determine AdvTor to initialize reference rectangles using flags and current values for positions and dimensions of dialog controls. Flags are defined in plugins.h.
+	If the first item has a control ID of -1, refWidthControl is the minimum width and refHeightControl is the minimum height before enabling scroll bars and scrolling; if AdvOR should handle scroll bars and scrolling, the messages WM_HSCROLL and WM_VSCROLL should be forwarded to the AdvOR main window as WM_USER+12 and WM_USER+13, having wParam unchanged and lParam is the window handle for this plugin's configuration window.
+
+
+
+	1.4. int __stdcall AdvTor_RegisterNewConnection(DWORD connection_id,int connection_type,char *address,LPARAM *lParam);
+
+	connection_id = unique identifier for this connection
+	connection_type = connection type, as defined in plugins.h
+	address = remote address, can be NULL if no socket is associated with this connection or if the socket is not connected
+	lParam = a pointer to a 32-bit value that can be associated by this plugin to this connection, or NULL if all available parameters are already used by other plugins; this value is not changed by AdvTor
+
+	Return values:
+		0 = close this connection; the function that needs this connection will fail whatever it is trying to do
+		1 = register this connection; other plugins can disallow registering this connection
+
+
+
+	1.5. int __stdcall AdvTor_UnregisterConnection(DWORD connection_id,int connection_type,char *address,LPARAM *lParam);
+
+	connection_id = unique identifier for this connection
+	connection_type = connection type, as defined in plugins.h
+	address = remote address, can be NULL if no socket is associated with this connection or if the socket is not connected
+	lParam = a pointer to a 32-bit value that can be associated by this plugin to this connection, or NULL if all available parameters are already used by other plugins; this value is not changed by AdvTor
+
+	Return values:
+		0 = don't close this connection; AdvTor_UnregisterConnection will be called again for this connection
+		1 = close and unregister this connection
+
+
+
+	1.6. int __stdcall AdvTor_HandleRead(DWORD connection_id,int connection_type,int connection_state,char *address,char *buffer_in,int *data_size,int max_data_size,LPARAM *lParam);
+
+	connection_id = unique identifier for this connection
+	connection_type = connection type, as defined in plugins.h
+	connection_state = current state for this connection, as defined in plugins.h
+	address = remote address
+	buffer_in = a buffer that has data that was read from a socket or that was written by other plugins
+	data_size = a pointer to the number of bytes that were written to buffer_in
+	max_data_size = maximum number of bytes that can be written to buffer_in
+	lParam = a pointer to a 32-bit value that can be associated by this plugin to this connection, or NULL if all available parameters are already used by other plugins; this value is not changed by AdvTor
+
+	Return values:
+		-1 = there was an error, this connection must be closed
+		0 = call this function again to get more data
+		1 = continue processing this buffer
+
+	If the plugin changes the contents of buffer_in, it must also update data_size. If other plugins already cleared buffer_in, or when 0 was returned from previous call, data_size is 0 and max_data_size has the maximum number of bytes that can be written to buffer_in.
+
+
+
+	1.7. int __stdcall AdvTor_HandleWrite(DWORD connection_id,int connection_type,int connection_state,char *address,char *buffer_out,int *data_size,int max_data_size,LPARAM *lParam);
+
+	connection_id = unique identifier for this connection
+	connection_type = connection type, as defined in plugins.h
+	connection_state = current state for this connection, as defined in plugins.h
+	address = remote address
+	buffer_out = a buffer that has the data that needs to be sent
+	data_size = a pointer to the number of bytes that were written to buffer_out
+	max_data_size = maximum number of bytes that can be written to buffer_out
+	lParam = a pointer to a 32-bit value that can be associated by this plugin to this connection, or NULL if all available parameters are already used by other plugins; this value is not changed by AdvTor
+
+	Return values:
+		-1 = there was an error, this connection must be closed
+		0 = call this function again to get more data
+		1 = continue processing this buffer
+
+	If the plugin changes the contents of buffer_out, it must also update data_size. If other plugins already cleared buffer_out, or when 0 was returned from previous call, data_size is 0 and max_data_size has the maximum number of bytes that can be written to buffer_out.
+
+
+
+	1.8. int __stdcall AdvTor_TranslateAddress(DWORD connection_id,const char *original_address,char *translated_address,LPARAM *lParam,BOOL is_error);
+
+	connection_id = unique identifier for the connection that is about to connect to this address or 0 if the address is not associated with an existing connection
+	original_address = the address that was sent by a client or by AdvTor.dll
+	translated_address = final address that will be used by AdvTor with OR connections; can point to original_address
+	lParam = a pointer to a 32-bit value that can be associated by this plugin to this connection, or NULL if all available parameters are already used by other plugins or connection_id is 0
+	is_error = a resolve request has failed for original_address
+
+	Return values:
+		0 = this address was banned by plugin
+		1 = continue processing this request
+
+	This function is called after a socks connection request was received from a client, to allow plugins to re-map a requested address.
+
+
+
+	1.9. void __stdcall AdvTor_ChangeIdentity(DWORD new_IP,char *new_country,long time_delta);
+
+	new_IP = new exit IP for all connections; 0.0.0.0 = random IP; 127.0.0.1 = no exit
+	new_country = a 2-letter country identifier or NULL if the exit will be selected from a random country
+	time_delta = number of seconds that is added to current local time when the option to use fake local time is enabled
+
+	This function is called every time the user selects a new exit for all connections or when the "New identity" button is clicked.
+
+
+
+	1.10. void __stdcall AdvTor_Start(BOOL started);
+
+	started = a boolean value, 0 if entering hibernation, 1 if hibernation was canceled.
+
+	This function is called when hibernation status changes. When entering hibernation, all circuits are destroyed and all connections are closed. When hibernation is canceled, AdvTor may not immediately start building circuits if predicted circuits are disabled.
+
+
+
+	1.11. void __stdcall AdvTor_RouterChanged(DWORD ip,unsigned char *identity_hash,int changed);
+
+	ip = IP address of the router that was updated
+	identity_hash = identity digest of the router, of size DIGEST_LEN
+	changed = information about what was changed; can have one of the following values:
+		0 = a router was removed
+		1 = a router was added
+		2 = a router was updated
+		3 = the routerlist was refreshed
+
+	This function is called for each router that was changed when updating network status. If ip is 0, network status information was replaced.
+
+
+
+	1.12. BOOL HiddenService_NotifyService(int notification_code,char *onion_address,int virtual_port,DWORD client_id,LPARAM *lParam);
+
+	notification_code = can have one of the following values:
+		HIDDENSERVICE_REGISTER_SERVICE
+			Return values:
+				0 = do not register this service
+				1 = register this service and publish hidden service information
+		HIDDENSERVICE_UNREGISTER_SERVICE
+			Return values: none
+		HIDDENSERVICE_REGISTER_CLIENT
+			Return values:
+				0 = disconnect this client
+				1 = continue processing data from this client
+		HIDDENSERVICE_UNREGISTER_CLIENT
+			Return values: none
+	onion_address = a null-terminated string that has the address for the hidden service
+	virtual_port = a virtual port associated with this hidden service that can be used by clients
+	client_id = a unique identifier for a client connection or 0 if this parameter is not used
+	lParam = a pointer to a 32-bit value that can be associated by this plugin to a client connection, or NULL if this parameter is not used or all available parameters are already used by other plugins; this value is not changed by AdvTor
+
+	This function is called to notify the plugin about interesting events related to its hidden services.
+
+
+
+	1.13. BOOL HiddenService_HandleRead(char *onion_address,DWORD client_id,char *buffer,int buffer_size,LPARAM *lParam);
+
+	onion_address = a null-terminated string that has the address for the hidden service
+	client_id = a unique identifier for a client connection
+	buffer = a buffer that has incoming data
+	buffer_size = the number of bytes that were received
+	lParam = a pointer to a 32-bit value that can be associated by this plugin to this client connection, or NULL if all available parameters are already used by other plugins; this value is not changed by AdvTor
+
+	Return values:
+		0 = disconnect this client
+		1 = continue processing data from this client
+
+	This function is called every time a hidden service provided by this plugin receives data from a client.
+
+
+
+	1.14. void __stdcall AdvTor_InterceptProcess(DWORD pid,BOOL intercept);
+
+	pid = identifier of a process that is intercepted or released
+	intercept = true if the process is intercepted, false if the process is released
+
+	This function is called every time a new process is intercepted or an intercepted process is released.
+
+
+
+	1.15. void __stdcall AdvTor_LanguageChange(char *language_name);
+
+	language_name = the name of the language that was selected
+
+	This function is called every time a new language is selected from the System dialog.
+
+
+
+
+
+		2. Functions that can be called by plugins
+
+
+	2.1. void __stdcall log(int severity,char *message);
+
+	severity = a priority code, 0 is the most important; severity codes are defined in plugins.h
+	message = a NULL-terminated UTF-8 encoded string containg a message
+
+	This function outputs a message to debug window and/or saves it to log.
+
+
+
+	2.2. BOOL __stdcall tor_is_started(void);
+
+	This function returns true if TOR is started and false if TOR is hibernating.
+
+
+
+	2.3. int __stdcall get_connection_count(void);
+
+	This function returns the number of registered connections.
+
+
+
+	2.4. int __stdcall get_connections(HANDLE hPlugin,connection_info_t *buffer,int connection_count);
+
+	hPlugin = a handler for current plugin instance given by AdvTor_InitPlugin()
+	buffer = a pointer to an array of connection_info_t structures that will be filled by this function
+	connection_count = maximum number of connection_info_t structures that can be written to this buffer
+
+	Return values:
+		- the number of connection_info_t structures written to buffer
+
+	This function returns an array of connection_info_t structures filled with information about existing connections. To get the total number of connections use get_connection_count().
+
+
+
+	2.5. BOOL __stdcall close_connection(DWORD connection_id);
+
+	connection_id = unique identifier for an existing connection or for a hidden service client
+
+	This function closes an existing connection. If no connection having specified connection_id was found, this function returns 0;
+
+
+
+	2.6. int __stdcall connection_read(DWORD connection_id);
+
+	connection_id = unique identifier for an existing connection
+
+	Return values:
+		-1 = no connection was found having requested connection_id
+		0 = there was an error, no data can be processed at this time
+
+	This function causes an AdvTor_HandleRead event for all plugins.
+
+
+
+	2.7. int __stdcall connection_write(DWORD connection_id);
+
+	connection_id = unique identifier for an existing connection
+
+	Return values:
+		-1 = no connection was found having requested connection_id
+		0 = there was an error, no data can be processed at this time
+
+	This function causes an AdvTor_HandleWrite event for all plugins.
+
+
+
+	2.8. const char* __stdcall get_socks_address(DWORD connection_id,BOOL original_address);
+
+	connection_id = unique identifier for an existing connection
+	original_address = if this value is true, the function returns the original proxy request sent by the client that uses this connection; if this value is false, the function returns a rewritten/remapped/resolved address that may be sent to OR network
+
+	This function retrieves a pointer to the address that is used by an edge connection.
+
+
+
+	2.9. BOOL __stdcall set_socks_address(HANDLE plugin_instance,DWORD connection_id,char *original_address,int command);
+
+	plugin_instance = the handler for current plugin instance that was returned by AdvTor_InitPlugin()
+	connection_id = unique identifier for an existing connection
+	original_address = the new address that will be used for this connection
+	command = socks request, can be one of the following:
+		SOCKS_COMMAND_CONNECT		- open a connection to original_address
+		SOCKS_COMMAND_RESOLVE		- resolve a hostname to an IP
+		SOCKS_COMMAND_RESOLVE_PTR	- turn an IP into a hostname
+
+	Return values:
+		0 = no circuits can handle original address or the address is banned
+		1 = the address was changed and the connection was re-attached to a new circuit
+
+	This function changes original_address of an existing connection and (re)attaches the connection to a circuit that can handle original_address.
+
+
+
+	2.10. DWORD __stdcall get_connecting_process(DWORD connection_id)
+
+	connection_id = unique identifier for an existing connection
+
+	Return values:
+		- identifier of the process that created this connection or 0 if no PID is associated with it
+
+	This function returns the PID of the process that connected (or was redirected) to AdvTor's proxy port.
+
+
+
+	2.11. int __stdcall get_process_name(DWORD pid,char *buffer)
+
+	pid = identifier of a process
+	buffer = a buffer that receives the name of the module that created that process
+
+	Return values:
+		- the number of bytes that were written to buffer including the null terminator.
+
+	This function returns the name of the executable file that created a process.
+
+
+
+	2.12. int __stdcall translate_address(HANDLE plugin_instance,char *original_address,char *translated_address);
+
+	plugin_instance = the handler for current plugin instance that was returned by AdvTor_InitPlugin()
+	original_address = the address that needs to be translated
+	translated_address = final address
+
+	Return values:
+		- the number of bytes that were written to translated_address including the null terminator.
+
+	This function searches address maps and calls all plugins to translate original_address.
+
+
+
+	2.13. void __stdcall map_address(HANDLE plugin_instance,char *address, char *new_address);
+
+	plugin_instance = the handler for current plugin instance that was returned by AdvTor_InitPlugin()
+	address = initial address
+	new_address = translated address, or NULL if the mapping is removed
+
+	This function adds or removes an address to/from address map.
+
+
+
+	2.14. BOOL __stdcall tor_resolve_address(HANDLE plugin_instance,char *address,BOOL reverse);
+
+	plugin_instance = the handler for current plugin instance that was returned by AdvTor_InitPlugin()
+	address = the address that needs to be resolved
+	reverse = if reverse is true, a reverse lookup will be done.
+
+	Return values:
+		0 = the request could not be launched
+		1 = the request was launched
+
+	This function launches a remote hostname lookup for specified address and returns immediately. To get a result, the plugin must export AdvTor_TranslateAddress().
+
+
+
+	2.15. DWORD __stdcall choose_exit(DWORD flags,DWORD after,DWORD ip_range_low,DWORD ip_range_high,unsigned long bandwidth_rate_min,const char *country_id,DWORD connection_id,char *buffer);
+
+	flags = a set of bit flags, can be a combination of the following flags:
+		EXIT_SELECT_USE_IP_RANGE = ip_range_low and ip_range_high are used
+		EXIT_SELECT_USE_BANDWIDTH = bandwidth_rate_min is used
+		EXIT_SELECT_USE_COUNTRY = country_id is valid
+		EXIT_SELECT_SET_CONNECTION = connection_id is valid and the connection associated with it will use chosen exit
+		EXIT_SELECT_GET_NICKNAME = buffer is valid and it will be filled with a string which uniquely identifies the first router that meets all requirements
+	after = IP address of the previous router returned by this function or 0.0.0.0 if this is the first call
+	ip_range_low = if requested exit router must be within an IP range, ip_range_low is the minimum value for an IP in this range
+	ip_range_high = if requested exit router must be within an IP range, ip_range_high is the maximum value for an IP in this range
+	bandwidth_rate_min = minimum accepted bandwidth rate, in bytes/second
+	country_id = a 2-letter string which identifies a country where requested router can be found
+	connection_id = identifier of an existing connection that will use the chosen exit, or 0 if EXIT_SELECT_SET_CONNECTION is not set
+	buffer = a buffer that receives a nickname, or NULL if EXIT_SELECT_GET_NICKNAME is not set
+
+	Return values:
+		IP address of the first found router
+
+	This function searches router list for a router that is not banned, and returns the first router that meets all requirements. Optionally, it can update chosen exit for a connection and it can return a unique string that identifies the router.
+
+
+
+	2.16. BOOL __stdcall get_router_info(int index,DWORD router_ip,char *nickname,router_info_t *router_info);
+
+	index = 0-based enumeration index
+	router_ip = IP number of a router, or 0 if this value is not used
+	nickname = a nickname or identity hash, or NULL if nickname is not used
+	router_info = a pointer to a router_info_t structure which receives information about requested router
+
+	Return values:
+		0 = no router was found that meets all requirements
+		1 = router_info was updated
+
+	This function can be used to enumerate all routers and/or to get information about a specific router.
+
+
+
+	2.17. int __stdcall is_router_banned(DWORD router_ip,char *nickname);
+
+	router_ip = IP address of a router, or 0 if only the nickname is searched
+	nickname = a unique string which identifies a router; can be a nickname or a digest
+
+	Return values:
+		-1 = no router was found
+		0 = the router is not banned
+		1 = the router is banned
+
+	This function can be used to verify if a router is banned.
+
+
+
+	2.18. int __stdcall ban_router(DWORD router_ip,int ban_type,BOOL is_banned);
+
+	router_ip = IP address of a router that will be banned or unbanned
+	ban_type = the type of ban that will be set; can be BAN_GENERAL or BAN_EXIT
+	is_banned = 0 if the router will be unbanned, 1 if the router will be banned
+
+	Return values:
+		- the number of routers that were banned or unbanned
+
+
+
+	2.19. const char * __stdcall geoip_get_country_id(DWORD ip);
+
+	ip = an IP address
+
+	Return values:
+		- a pointer to a 2-letter country identifier
+
+	This function searches GeoIP database for an IP address and returns a pointer to a string that has its country identifier.
+
+
+
+	2.20. const char * __stdcall geoip_get_country_name(DWORD ip);
+
+	ip = an IP address
+
+	Return values:
+		- a pointer to a country name
+
+	This function searches GeoIP database for an IP address and returns a pointer to a string that has its country name.
+
+
+
+	2.21. long __stdcall get_time_delta(void);
+
+	This function returns number of seconds that is added to current local time when the option to use fake local time is enabled.
+
+
+
+	2.22. int __stdcall crypto_rand_int(unsigned int max);
+
+	max = maximum value for a generated random number
+
+	This function returns a pseudorandom integer chosen between 0 and max.
+
+
+
+	2.23. void __stdcall randomize_buffer(char *buffer,int buffer_size);
+
+	buffer = a buffer that will have random data
+	buffer_size = the number of bytes that will be written to buffer
+
+	This function will write buffer_size bytes of strong random data to buffer.
+
+
+
+	2.24. int __stdcall get_configuration_value(HANDLE plugin_instance,char *option,char *buffer,int buffer_size);
+
+	plugin_instance = the handler for current plugin instance that was returned by AdvTor_InitPlugin() or NULL if this function should return a value used by AdvTor.
+	option = variable name
+	buffer = a buffer that has configuration strings, each value on a new line
+	buffer_size = maximum number of bytes that can be written
+
+	Return values:
+		- the number of bytes that were written to buffer, including the null terminator
+
+	This function can return a plugin-specific configuration value (each plugin DLL can have its own private configuration values that are written to AdvTor.ini) or a configuration value that is used by AdvTor.
+
+
+
+	2.25. BOOL __stdcall set_configuration_value(HANDLE plugin_instance,char *option,char *value);
+
+	plugin_instance = the handler for current plugin instance that was returned by AdvTor_InitPlugin()
+	option = variable name
+	value = a null-terminated string with values for this option, each value on a new line; if value is NULL, the configuration option is deleted
+
+	Return values:
+		0 = there was an error changing this configuration option
+		1 = the option was updated
+
+	This function updates a plugin-specific configuration value that can be written to AdvTor.ini. Plugin options are private for each plugin DLL and they are not used by AdvTor.
+
+
+
+	2.26. BOOL __stdcall intercept_process(HANDLE plugin_instance,DWORD pid,DWORD flags,char *local_address);
+
+	plugin_instance = the handler for current plugin instance that was returned by AdvTor_InitPlugin()
+	pid = identifier of a process
+	flags = a set of bit flags, can be a combination of the following flags:
+		INTERCEPT_FLAG_FAKE_LOCAL_TIME			- this process will use fake local time
+		INTERCEPT_FLAG_FAKE_IPS				- this process will resolve all addresses to fake IPs
+		INTERCEPT_FLAG_TCP_ONLY				- disallow non-TCP sockets
+		INTERCEPT_FLAG_CHANGE_ICON			- change icon to indicate AdvTod.dll's presence
+		INTERCEPT_FLAG_EXCLUSIVE_EXIT			- exit nodes used by this process cannot be simultaneously used by other processes
+		INTERCEPT_FLAG_NOTIFY_USER			- popup a message box to notify the user if the process could not be intercepted
+		INTERCEPT_FLAG_IGNORE_EXISTING_CONNECTIONS	- don't check for existing connections
+	local_address = a pointer to a null-terminated string specifying an address that will be returned when the process tries to get local hostname
+
+	Return values:
+		0 = there was an error intercepting this process
+		1 = the process was intercepted successfully
+
+	This function can be used to itercept another process to force its new connections to go through OR network.
+
+
+
+	2.27. BOOL __stdcall create_intercepted_process(HANDLE plugin_instance,char *exename,DWORD flags,char *local_address);
+
+	plugin_instance = the handler for current plugin instance that was returned by AdvTor_InitPlugin()
+	exename = a null-terminated string that specifies an executable file
+	flags = a set of bit flags, can be a combination of the following flags:
+		INTERCEPT_FLAG_FAKE_LOCAL_TIME			- this process will use fake local time
+		INTERCEPT_FLAG_FAKE_IPS				- this process will resolve all addresses to fake IPs
+		INTERCEPT_FLAG_TCP_ONLY				- disallow non-TCP sockets
+		INTERCEPT_FLAG_CHANGE_ICON			- change icon to indicate AdvTod.dll's presence
+		INTERCEPT_FLAG_EXCLUSIVE_EXIT			- exit nodes used by this process cannot be simultaneously used by other processes
+		INTERCEPT_FLAG_NOTIFY_USER			- popup a message box to notify the user if the process could not be intercepted
+	local_address = a pointer to a null-terminated string specifying an address that will be returned when the process tries to get local hostname
+
+	Return values:
+		0 = there was an error
+		1 = the process was created and intercepted by AdvTor.dll
+
+	This function can be used to create a new process that will have all its connections forced to go through OR network.
+
+
+
+	2.28. BOOL __stdcall release_process(HANDLE plugin_instance,DWORD pid);
+
+	plugin_instance = the handler for current plugin instance that was returned by AdvTor_InitPlugin()
+	pid = identifier of a process
+
+	Return values:
+		0 = there was an error; the process was not found or the process was not intercepted or AdvTor.dll could not be unloaded from it
+		1 = AdvTor.dll was unloaded from requested process
+
+	This function can be used to unload AdvTor.dll from an intercepted process.
+
+
+
+	2.29. BOOL __stdcall is_process_intercepted(HANDLE plugin_instance,DWORD pid);
+
+	plugin_instance = the handler for current plugin instance that was returned by AdvTor_InitPlugin()
+	pid = identifier of a process
+
+	Return values:
+		0 = the process is not intercepted
+		1 = the process is intercepted
+
+	This function can be used to test if a process is intercepted by AdvTor.dll.
+
+
+
+	2.30. DWORD __stdcall create_connection(HANDLE plugin_instance,char *remote_address,int remote_port,BOOL exclusive,LPARAM lParam);
+
+	plugin_instance = the handler for current plugin instance that was returned by AdvTor_InitPlugin()
+	remote_address = the address where the exit node will connect
+	remote_port = the port that will be used by the exit node to connect to remote_address
+	exclusive = use an exclusivity key private for this DLL to exclude exit nodes used by other plugins or processes
+	lParam = initial plugin-specific parameter for this connection
+
+	Return values:
+		0 = there was an error when creating this connection
+		any other value = an identifier for a connection
+
+	This function can be used to create a connection that goes through OR network. To send data to remote_address, the plugin should listen for AdvTor_HandleRead() events and write the requests to be sent to buffer_in. To read the responses received from remote_address the plugin should listen for AdvTor_HandleWrite() events. A connection created by a plugin will have its buffer_out cleared after each AdvTor_HandleWrite() event. To start sending data, the plugin should use connection_read().
+
+
+
+	2.31. LPARAM* __stdcall get_connection_param(HANDLE plugin_instance,DWORD connection_id);
+
+	plugin_instance = the handler for current plugin instance that was returned by AdvTor_InitPlugin()
+	connection_id = unique identifier for a connection or for a hidden service client
+
+	Return values:
+		- NULL = this plugin cannot have LPARAM values for connections because all available parameters are already used by other plugins
+		- a pointer to a 32-bit value associated to this connection that can be changed by this plugin
+
+
+
+	2.32. DWORD __stdcall accept_client(HANDLE plugin_instance,SOCKET socket,char *remote_address,int remote_port,int exclusivity,LPARAM lParam);
+
+	plugin_instance = the handler for current plugin instance that was returned by AdvTor_InitPlugin()
+	socket = a descriptor for a client connection that was accepted by this plugin
+	remote_address = the address where the client wants to connect, or NULL if the client is expected to send a proxy request
+	remote_port = the port number that will be used with remote_address
+	exclusivity = can have one of the following values:
+		EXCLUSIVITY_UNDEFINED = this connection is not associated with any process/plugin chain
+		EXCLUSIVITY_GENERAL = this connection can only use exit nodes that are not used by process/plugin chains that have exclusivity enabled
+		EXCLUSIVITY_PROCESS = apply the exit restrictions set for the process that created this connection
+		EXCLUSIVITY_PLUGIN = apply this plugin's exit restrictions
+	lParam = initial plugin-specific parameter for this connection
+
+	Return values:
+		- 0 = there was an error accepting this connection
+		- any other value = a connection identifier for this socket
+
+	This function can be used by plugins that can intercept other processes to force their connections to go through the OR network.
+
+
+
+	2.33. BOOL __stdcall hs_send_reply(HANDLE plugin_instance,DWORD client_id,char *buffer,int buffer_size);
+
+	plugin_instance = the handler for current plugin instance that was returned by AdvTor_InitPlugin()
+	client_id = a unique identifier for a client connection
+	buffer = a pointer to a buffer that has data that will be sent
+	buffer_size = the number of bytes to send
+
+	Return values:
+		- 0 = client_id was not found or is about to be disconnected
+		- 1 = client_id was found and the connection is still open
+
+	This function can be used by a plugin to send a reply to a client request for a hosted hidden service.
+
+
+
+	2.34. int __stdcall as_from_ip(DWORD ip);
+
+	ip = an IP address
+
+	Return values:
+		- an integer specifying an AS number for a requested IP or AS_UNKNOWN if no AS was found for it
+
+	This function searches AS path database for an IP address and returns its AS number.
+
+
+
+	2.35. int __stdcall get_as_paths(DWORD *iplist,DWORD *buffer,int buffer_size);
+
+	iplist = an array of IPs terminated with 0
+	buffer = a pointer to a buffer that receives a list of possible AS paths separated by -1; the list is terminated by 0
+	buffer_size = the number of bytes that can be written
+
+	Return values:
+		- an integer specifying an AS number for the first IP from iplist
+
+	This function searches AS path database for AS paths for all IPs from iplist and combines them to form possible shortest paths between the first IP and the last IP passing through all IPs from iplist. AS's for IP's from iplist are OR'ed with 0x80000000.
+
+
+
+	2.36. BOOL __stdcall is_as_path_safe(DWORD *aslist);
+
+	aslist = a buffer that contains AS paths separated by -1 that were returned by a call to get_as_paths()
+
+	Return values:
+		- if no intersections were found in any AS path from aslist, this function returns 1; if intersections are found, intersection points are OR'ed with 0x40000000 in aslist and the function returns 0.
+
+	This function searches AS path database for an IP address and returns its AS number.
+
+
+
+	2.37. void * __stdcall tor_malloc(size_t size);
+
+	size = the number of bytes that will be allocated
+
+	Return values:
+		- a pointer to an allocated buffer
+
+	This function never returns NULL. On error, AdvOR shows an error message and exit. Different versions of AdvOR may have different implementations for this function. Version 0.2.0.12 uses malloc().
+
+
+
+	2.38. void __stdcall tor_free(void *mem);
+
+	mem = a pointer to a buffer that was allocated using tor_malloc()
+
+	This function frees a buffer that was allocated using tor_malloc().
+
+
+
+	2.39. void * __stdcall safe_malloc(size_t size);
+
+	size = the number of bytes that will be allocated
+
+	Return values:
+		- a pointer to an allocated buffer
+		- NULL if this function fails
+
+	This function attempts to allocate a buffer that will not be cached to the Windows swap file.
+
+
+
+	2.40. void __stdcall safe_free(void *mem);
+
+	mem = a pointer to a buffer that was allocated using safe_malloc()
+
+	This function frees a buffer that was allocated using safe_malloc().
+
+
+
+	2.41. int __stdcall write_protected_file(char *filename,char *buffer,int bufsize);
+
+	filename = a NULL-terminated UTF-8 string that specifies a file name; this name can be used to read from the same file
+	buffer = points to the buffer containing the data to be written
+	bufsize = specifies the number of bytes to write
+
+	Return values:
+		-1 = the file could not be written
+		0 = the file was written successfully
+
+	If the read-only mode is enabled, the file will not be written to disk, but it will be cached and can be read using read_protected_file(). If the option to compress and encrypt configuration files is enabled, the file will be compressed and encrypted and added to AdvOR.dat. By default, a file is written to disk that will have a name prefixed by AdvOR's executable file name.
+
+
+
+	2.42. int __stdcall append_to_protected_file(char *filename,char *buffer,int bufsize);
+
+	filename = a NULL-terminated UTF-8 string that specifies a file name; this name can be used to read from the same file
+	buffer = points to the buffer containing the data to be written
+	bufsize = specifies the number of bytes to write
+
+	Return values:
+		-1 = the file could not be written
+		0 = the file was written successfully
+
+	This function appends a buffer to a protected file. If the protected file does not exist, it is created. If the read-only mode is enabled, the file will not be written to disk, but it will be cached and can be read using read_protected_file(). If the option to compress and encrypt configuration files is enabled, the file will be compressed and encrypted and added to AdvOR.dat. By default, a file is written to disk that will have a name prefixed by AdvOR's executable file name.
+
+
+
+	2.43. int __stdcall read_protected_file(char *filename,char **buffer);
+
+	filename = a NULL-terminated UTF-8 string that specifies a file that was written using write_protected_file() or append_to_protected_file()
+	buffer = points to the location where a pointer to the buffer that receives the data read from the file will be written; this buffer should be freed using tor_free();
+
+	Return values:
+		-1 = there was an error or the file does not exist
+		any other value = the number of bytes that were written to buffer
+
+	This function reads a file that was saved using write_protected_file() or append_to_protected_file().
+
+
+
+	2.44. BOOL __stdcall protected_file_exists(char *filename);
+
+	filename = a NULL-terminated UTF-8 string that specifies a file that was written using write_protected_file() or append_to_protected_file()
+
+	Return values:
+		0 = the file was not found
+		1 = the file was found (on disk or in cache)
+
+	This function can be used to verify if a protected file exists.
+
+
+
+	2.45. int tor_gzip_compress(char **buffer_out,size_t *out_len,char *buffer_in,size_t in_len,int method);
+
+	buffer_out = a pointer to the location where a pointer to a newly allocated buffer will be written; use tor_free() to free this buffer
+	out_len = a pointer to the location where the size of the buffer_out buffer will be written
+	buffer_in = a pointer to a buffer that contains uncompressed data
+	in_len = size of uncompressed data
+	method = compression method; can be GZIP_METHOD or ZLIB_METHOD
+
+	Return values:
+		0 = success
+		-1 = failure
+
+	This function compresses in_len bytes from buffer_in to a newly allocated buffer using the reuqested method. The compressed result is stored in buffer_out and the size of compressed data is written to out_len.
+
+
+
+	2.46. int tor_gzip_uncompress(char **buffer_out,size_t *out_len,const char *buffer_in,size_t in_len,int method,int complete_only,int log_level);
+
+	buffer_out = a pointer to the location where a pointer to a newly allocated buffer will be written; use tor_free() to free this buffer
+	out_len = a pointer to the location where the size of the buffer_out buffer will be written
+	buffer_in = a pointer to a buffer that contains compressed data
+	in_len = size of compressed data
+	method = compression method; can be GZIP_METHOD or ZLIB_METHOD; use detect_compression_method() if the method is uknown
+	complete_only = if this value is true, a truncated input is considered a failure
+	log_level = the log level that will be used for all warnings shown by this function
+
+	Return values:
+		0 = success
+		-1 = failure
+
+	This function uncompresses in_len bytes from buffer_in to a newly allocated buffer using the requested method. The uncompressed result is stored in buffer_out and the size of decompressed data is written to out_len.
+
+
+
+	2.47. tor_zlib_state_t *tor_zlib_new(int compress,int method);
+
+	compress = 1 if this object is used for compressing data, 0 if this object is used for uncompressing data
+	method = compression method; can be GZIP_METHOD or ZLIB_METHOD; when decompressing, use detect_compression_method() if the method is uknown
+
+	Return values:
+		- a tor_zlib_state_t object
+
+	This function creates a tor_zlib_state_t object that can be used with the tor_zlib_process() function.
+
+
+
+	2.48. tor_zlib_output_t tor_zlib_process(tor_zlib_state_t *state,char **buffer_out,size_t *out_len,char **buffer_in,size_t *in_len,int finish);
+
+	state = a tor_zlib_state_t object that was created with tor_zlib_new()
+	buffer_out = a pointer to the location where a pointer to a buffer will be written; use tor_zlib_free() to free this buffer
+	out_len = a pointer to the location where the size of the buffer_out buffer will be written
+	buffer_in = a pointer to a location where a pointer to the input buffer can be found; this function adjusts the pointer to the input buffer with the number of bytes that were compressed / decompressed.
+	in_len = a pointer to size of compressed data; this function will adjust the value pointed by in_len to contain the number of available bytes remaining in buffer_in
+	finish = if this value is true, this is end of the input
+
+	Return values:
+		TOR_ZLIB_DONE = the compression/decompression was finished
+		TOR_ZLIB_OK = everything from the input buffer was processed
+		TOR_ZLIB_BUF_FULL = not enough space in buffer_out
+		TOR_ZLIB_ERR = the stream is corrupt
+
+	This function will compress / decompress some bytes from buffer_in using a tor_zlib_state_t object state created by tor_zlib_new(). It reads up to in_len bytes from buffer_in and writes up to out_len bytes to buffer_out, adjusting all values. If finish is true, the end of the input was reached.
+
+
+
+	2.49. void tor_zlib_free(tor_zlib_state_t *state);
+
+	state = a state object that was created with tor_zlib_new()
+
+	This function frees a tor_state_t object.
+
+
+
+	2.50. int detect_compression_method(char *buffer_in, size_t in_len);
+
+	buffer_in = a pointer to a buffer that has data compressed with an unknown method
+	in_len = the size of buffer_in
+
+	Return values:
+		- GZIP_METHOD, ZLIB_METHOD or UNKNOWN_METHOD
+
+	This function attempts to detect the compression method that was used or buffer_in and returns the likeliest compression method. If the buffer is not compressed, or if the compression method could not be detected, this function returns UNKNOWN_METHOD.
+
+
+
+	2.51. char * __stdcall lang_get_string(HANDLE plugin_instance,int string_id,char *default_string);
+
+	plugin_instance = the handler for current plugin instance that was returned by AdvTor_InitPlugin()
+	string_id = numerical identifier of a string from plugin's language file
+	default_string = a pointer to string that is returned if no language string was found for current language having requested identifier; can be NULL
+
+	Return values:
+		- a pointer to a NULL-terminated UTF-8 encoded string from a language file.
+
+	Language files for plugins are named %[dll_name]-%[language].lng and are located in AdvOR-plugins directory (the English language file for a plugin named "plugin.dll" is "plugin-English.lng"). When a new language is selected, and the plugin requests a new language string, the language file for current language is loaded and parsed by AdvOR. If a string having the requested language identifier was found, it is returned. If no language file was found for current language or no language string having the requested identifier was found, default_string is returned.
+
+
+
+	2.52. void __stdcall lang_change_dialog_strings(HANDLE hPlugin,HWND hDlg,lang_dlg_info *dlgInfo);
+
+	plugin_instance = the handler for current plugin instance that was returned by AdvTor_InitPlugin()
+	hDlg = the parent dialog for all controls from dlgInfo
+	dlgInfo = a list of lang_dlg_info structures, the last structure has both ctrlId and langId set to 0
+
+	This function changes the text of all dialog controls specified in the dlgInfo list with language strings that can be found in the language file that was loaded for this plugin.
+
+
+
+
+		3. Hidden services
+
+
+	If a plugin exports HiddenService_HandleRead(), it is added to hidden service selection dialog when the plugin is loaded. The function HiddenService_HandleRead() is the only function that is required to be exported for a plugin to be allowed to serve a hidden service. All other functions related to hidden services should be exported only if the plugin needs to handle events associated with them.
+	The user can select the DLL for a new hidden service and associate a virtual port with it, and AdvTor will create an .onion address and a private key for the hidden service or use an existing .onion address and an existing private key. More hidden services can be served by same plugin. If the function HiddenService_NotifyService() is exported, it will be called for each hidden service that is registered to be served by this plugin after AdvTor_InitPlugin() is called or when the user adds a new hidden service. When a service associated with this plugin is deleted, HiddenService_NotifyService() is called again to notify the plugin. The function HiddenService_NotifyService() is not required for a hidden service to be registered.
+	All hidden service notifications are called only for the services registered for this plugin on the "Hidden services" page.
+	When a new client connected to an .onion address that is handled by this plugin, HiddenService_NotifyService() is called to notify the plugin if it exports this function. All requests sent by a client will cause HiddenService_HandleRead() to be called to allow the plugin to handle those requests. A plugin can reply to a request using hs_send_reply(). When a client is disconnected from a hidden service, the plugin is notified by HiddenService_NotifyService().
+
+

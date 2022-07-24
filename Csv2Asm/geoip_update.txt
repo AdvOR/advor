@@ -1,0 +1,9 @@
+	Updating GeoIP database
+
+1. Download GeoIPCountryCSV.zip from http://www.maxmind.com/download/geoip/database/GeoIPCountryCSV.zip
+2. Extract GeoIPCountryWhois.CSV from GeoIPCountryCSV.zip in the Csv2Asm directory
+3. If you want to edit the IP ranges from GeoIPCountryWhois.CSV be sure all ranges remain sorted.
+4. Execute csv2asm.exe and it will do the following:
+	- generates geoip_c.h
+	- displays a messagebox with number of different IP ranges detected
+6. Overwrite geoip_c.h located in /or directory with the new one from Csv2Asm
