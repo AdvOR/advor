@@ -542,8 +542,8 @@ void dlgForceTor_interceptNewProcess(void)
 		int i;
 		config_line_t *cfg;
 		if(get_file_attributes(exeName)&FILE_ATTRIBUTE_DIRECTORY)
-		{	for(;*tmp2;tmp2++)	;
-			for(;(tmp2>exeName)&&(*tmp2!='\\')&&(*tmp2!='/');tmp2--)	;
+		{	{ for(;*tmp2;tmp2++)	; }
+			{ for(;(tmp2>exeName)&&(*tmp2!='\\')&&(*tmp2!='/');tmp2--)	; }
 			if((*tmp2=='\\')||(*tmp2=='/')) tmp2++;
 		}
 		for(tmp3=progNameTmp;*tmp3;tmp3++)
@@ -554,7 +554,7 @@ void dlgForceTor_interceptNewProcess(void)
 		tor_snprintf(tmp1,strlen(exeName)+1024,"%s=%d,\"%s\" %s",progNameTmp,i,tmp2,cmdLineTmp);
 		if(tmpOptions->ForceFlags&4)
 		{	if(tmpOptions->QuickStart)
-			{	for(cfg=tmpOptions->QuickStart;cfg->next;cfg=cfg->next);
+			{	{ for(cfg=tmpOptions->QuickStart;cfg->next;cfg=cfg->next); }
 				cfg->next=tor_malloc_zero(sizeof(config_line_t));
 				cfg=cfg->next;
 			}
@@ -644,8 +644,8 @@ void dlgForceTor_addNewProcess(config_line_t *cfg1)
 		char *tmp1=tor_malloc(strlen(exeName)+1024),*tmp2,*tmp3;tmp2=exeName;
 		config_line_t *cfg;
 		if(get_file_attributes(exeName)&FILE_ATTRIBUTE_DIRECTORY)
-		{	for(;*tmp2;tmp2++)	;
-			for(;(tmp2>exeName)&&(*tmp2!='\\')&&(*tmp2!='/');tmp2--)	;
+		{	{ for(;*tmp2;tmp2++)	; }
+			{ for(;(tmp2>exeName)&&(*tmp2!='\\')&&(*tmp2!='/');tmp2--)	; }
 			if((*tmp2=='\\')||(*tmp2=='/')) tmp2++;
 		}
 		for(tmp3=progNameTmp;*tmp3;tmp3++)
@@ -662,7 +662,7 @@ void dlgForceTor_addNewProcess(config_line_t *cfg1)
 		}
 		else
 		{	if(tmpOptions->QuickStart)
-			{	for(cfg=tmpOptions->QuickStart;cfg->next;cfg=cfg->next);
+			{	{ for(cfg=tmpOptions->QuickStart;cfg->next;cfg=cfg->next); }
 				cfg->next=tor_malloc_zero(sizeof(config_line_t));
 				cfg=cfg->next;
 			}

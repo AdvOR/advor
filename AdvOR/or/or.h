@@ -12,8 +12,8 @@
 #ifndef _TOR_OR_H
 #define _TOR_OR_H
 #define int3 asm(".intel_syntax noprefix\nint 3\n.att_syntax prefix");
-#define advtor_ver "0.3.1.5"
-#define ADVTOR_DW_VER 0x00030104
+#define advtor_ver "0.3.2.0"
+#define ADVTOR_DW_VER 0x00030200
 #define FAKE_TOR_VER "0.2.2.39"
 #define MAX_PLUGIN_CONNECTION_PARAMS 100
 
@@ -2944,7 +2944,7 @@ typedef struct {
                                         * testing our DNS server. */
   int EnforceDistinctSubnets; /**< If true, don't allow multiple routers in the
                                * same network zone in the same circuit. */
-  int TunnelDirConns; /**< If true, use BEGIN_DIR rather than BEGIN when
+  int TunnelDirConns2; /**< If true, use BEGIN_DIR rather than BEGIN when
                        * possible. */
   int AllowNonRFC953Hostnames; /**< If true, we allow connections to hostnames
                                 * with weird characters. */

@@ -73,7 +73,7 @@ void dlgProxy_banSocksAddress(char *socksAddress)
 	{	config_line_t *cfg;
 		char *tmp = tor_malloc(256);
 		if(tmpOptions->BannedHosts)
-		{	for(cfg=tmpOptions->BannedHosts;cfg->next;cfg=cfg->next)	;
+		{	{ for(cfg=tmpOptions->BannedHosts;cfg->next;cfg=cfg->next)	; }
 			cfg->next = tor_malloc_zero(sizeof(config_line_t));
 			cfg = cfg->next;
 			cfg->key = (unsigned char *)tor_strdup("BannedHosts");
@@ -114,7 +114,7 @@ void dlgProxy_banDebugAddress(char *strban)
 		if(!hDlgBannedAddresses)
 		{	config_line_t *cfg;
 			if(tmpOptions->BannedHosts)
-			{	for(cfg=tmpOptions->BannedHosts;cfg->next;cfg=cfg->next)	;
+			{	{ for(cfg=tmpOptions->BannedHosts;cfg->next;cfg=cfg->next)	; }
 				cfg->next = tor_malloc_zero(sizeof(config_line_t));
 				cfg = cfg->next;
 				cfg->key = (unsigned char *)tor_strdup("BannedHosts");

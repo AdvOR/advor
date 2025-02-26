@@ -340,8 +340,9 @@ tor_addr_to_str(char *dest, const tor_addr_t *addr, int len, int decorate)
 
   switch (tor_addr_family(addr)) {
     case AF_INET:
-      if (len<3)
+      if (len<3) {
         return NULL;
+	  }
         ptr = tor_inet_ntop(AF_INET, &addr->addr.in_addr, dest, len);
       break;
     case AF_INET6:

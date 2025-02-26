@@ -155,7 +155,7 @@ void dlgTrackedHosts_addressMapRemove(HWND hDlg,char *newAddr)
 		while(*tmp1a<33 && *tmp1a) tmp1a++;
 	}
 	if(*tmp1a)
-	{	for(i=0;tmp1a[i]&&tmp1a[i]!=0x0d&&tmp1a[i]!=0x0a;i++)	;
+	{	{ for(i=0;tmp1a[i]&&tmp1a[i]!=0x0d&&tmp1a[i]!=0x0a;i++)	; }
 		if(tmp1a[i]==0x0d) i++;
 		if(tmp1a[i]==0x0a) i++;
 		while(tmp1a[i]){	*tmp1a=tmp1a[i];tmp1a++;}

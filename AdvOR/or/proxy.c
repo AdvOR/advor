@@ -489,7 +489,7 @@ int fetch_from_buf_socks(buf_t *buf, socks_request_t *req, int log_sockstype, in
 							req->socks_version='X';
 						}
 						if(tmp)
-						{	for(i=0;tmp[i]>32 && tmp[i]!=':';i++)	;
+						{	{ for(i=0;tmp[i]>32 && tmp[i]!=':';i++)	; }
 							if(tmp[i]==':' && tmp[i+1]=='/'  && tmp[i+2]=='/')	tmp += i + 3;
 						}
 					}

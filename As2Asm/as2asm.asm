@@ -1,4 +1,4 @@
-;aggr.html can be updated from http://www.cidr-report.org/as2.0/aggr.html
+;aggr.html can be updated from https://www.cidr-report.org/as2.0/aggr.html
 
 .386
 .model	flat,stdcall

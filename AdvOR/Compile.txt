@@ -1,127 +1,194 @@
-To build AdvOR.dll install masm32 from http://www.masm32.com then execute DLL\a.bat
-
-
-## Instructions for building AdvOR with MinGW (http://www.mingw.org/)
-##
-
-Stage One:  Download and Install MinGW and Masm32.
----------------------------------------
-
-Download mingw:
-http://sourceforge.net/projects/mingw/files/latest/download
-
-Start the installer and select mingw32-base, msys-base and mingw-developer-toolkit
-
-Download masm32 from http://masm32.com/download.htm
-
-Install masm32.
-
-Create a directory called "AdvOR".
+Instructions for building AdvOR.dll with Masm32
+-----------------------------------------------
 
 
 
+Download and install Masm32 from:
 
-Stage Two:  Download, extract, compile zlib
----------------------------------------------
+	https://masm32.com/download.htm
 
-Download zlib source:
-http://zlib.net/zlib-1.2.11.tar.gz
+Build AdvOR.dll:
 
-Extract zlib:
-Copy the zlib tarball into the "AdvOR" directory
-Type "cd AdvOR/"
-Type "tar zxf zlib-1.2.11.tar.gz"
+	DLL\a.bat
 
-CHOICE:
+Please note:
 
-Make zlib.a:
-Type "cd zlib-1.2.11/"
-Type "./configure"
-Type "make -f win32/Makefile.gcc"
-Assuming you have MingGW installed in c:/ :
-Type cp -iv zlib1.dll c:/mingw/bin
-Type cp -iv zconf.h zlib.h c:/mingw/include
-Type cp -iv libz.a c:/mingw/lib/libzlib.a
-
-Done.
+	BLDDLL.bat is no longer included in Masm32 bin directory, but can be found in DLL examples
+	ToDo: Does not build on modern Windows installations
 
 
 
-Stage Three:  Download, extract, compile openssl
+Instructions for building AdvOR.exe with MinGW
 ----------------------------------------------
 
-Download openssl:
-https://www.openssl.org/source/openssl-1.1.0g.tar.gz
-
-Extract openssl:
-Copy the openssl tarball into the "AdvOR" directory.
-Type "cd AdvOR/"
-Type "tar zxf openssl-1.1.0g.tar.gz"
-
-If you're using an older version of Perl for MinGW:
-  Download Perl-MinGW from https://sourceforge.net/projects/perl-mingw/
-  Extract bin, lib and share from perl-5.24.0-mingw32.zip/perl-5.24.0/ to the msys/1.0/ directory
-
-Make openssl libraries:
-Type "cd openssl-1.1.0g/"
-Type "./Configure -no-shared -no-idea -no-rc5 -no-mdc2 mingw"
-Edit Makefile and replace "\" with "/" in the line containing "PERL="
-Edit crypto/init.c and replace
-	"ret = GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_PIN,(void *)&base_inited, &handle);"
-	with:
-	"handle = GetModuleHandle((void *)&base_inited);ret = 1;"
-	and
-	"ret = GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_PIN,handlersym.sym, &handle);"
-	with:
-	"handle = GetModuleHandle(handlersym.sym);ret = 1;"
-Edit crypto/bio/b_addr.c and insert, after the #included files, a line containing "#undef AI_PASSIVE"
-Type "make depend"
-# The next steps can take up to 30 minutes to complete.
-Type "make"
-Type "make install"
 
 
-Stage Four: Download, extract, and compile libevent-2.1.8
-------------------------------------------------------
+1. Download and install MinGW, Masm32 and PERL
+----------------------------------------------
 
-Download the libevent 2.1.8 release:
-https://github.com/libevent/libevent/releases/download/release-2.1.8-stable/libevent-2.1.8-stable.tar.gz
+Download MinGW from:
 
-Copy the libevent tarball into the "AdvOR" directory.
+	https://sourceforge.net/projects/mingw/files/latest/download
 
-Extract libevent.
-Copy the libevent tarball into the "AdvOR" directory.
-Type "cd AdvOR/"
-Type "tar zxf libevent-2.1.8-stable.tar.gz"
-Type "cd libevent-2.1.8-stable/"
-Type "./configure --enable-static --disable-shared"
-Type "make"
-Type "make install"
+Start the installer and select these packages:
+
+	mingw32-base
+	msys-base
+	mingw-developer-toolkit
+
+In MSYS console downgrade these packages:
+
+	mingw-get upgrade "w32api<5.0.1" (problem with headers)
+	mingw-get upgrade "gcc<6.3" (problem with snprintf)
+
+Download PERL-MinGW from:
+
+	https://sourceforge.net/projects/perl-mingw/files/latest/download
+
+Extract following directories from "perl-5.24.0-mingw32.zip/perl-5.24.0" to "msys/1.0" directory:
+
+	bin
+	lib
+	share
+
+Download and install Masm32 from:
+
+	https://masm32.com/download.htm
+
+Finally create a directory called "AdvOR" in "msys/1.0"
 
 
-Stage Five: Download, extract, and compile libntlm-1.4
-------------------------------------------------------
 
-Download the libntlm 1.4 release:
-http://www.nongnu.org/libntlm/releases/libntlm-1.4.tar.gz
+2. Download and compile zLib
+----------------------------
 
-Copy the libevent tarball into the "AdvOR" directory.
-Type "cd AdvOR"
-Type "tar zxf libntlm-1.4.tar.gz"
-Type "cd libntlm-1.4/"
-Type "./configure --enable-static --disable-shared"
-Type "make"
-Type "make install"
+Download zLib source from:
+
+	https://zlib.net/zlib-1.3.1.tar.gz
+
+Copy zLib tarball into "AdvOR" directory and build it:
+
+	cd AdvOR
+	tar zxf zlib-1.3.1.tar.gz
+	cd zlib-1.3.1
+	./configure
+	make -f win32/Makefile.gcc
+
+Assuming you have MingGW installed in "C:/MinGW" copy and replace files below:
+
+	cp -iv zlib1.dll C:/MinGW/bin
+	cp -iv zconf.h zlib.h C:/MinGW/include
+	cp -iv libz.a C:/MinGW/lib/libzlib.a
 
 
-Stage Six:  Build AdvOR
-----------------------
 
-Download the current AdvOR release from https://sourceforge.net/projects/AdvTor/ .
-Extract AdvOR-src.zip into the "AdvOR" directory.
+3. Download and compile OpenSSL
+-------------------------------
 
-cd AdvOR
-Type "make"
+Download OpenSSL source from:
 
-You now have AdvOR.exe in current directory.
+	https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1w/openssl-1.1.1w.tar.gz
 
+Copy OpenSSL tarball into "AdvOR" directory and build it:
+
+	cd AdvOR
+	tar zxf openssl-1.1.1w.tar.gz
+	cd openssl-1.1.1w
+	./Configure --prefix=/usr/local --openssldir=/usr/local -no-shared -no-idea -no-rc5 -no-mdc2 mingw
+
+Edit "openssl-1.1.1w/Makefile" and replace "\" with "/" in the line containing "PERL="
+
+Edit "crypto/init.c" and replace:
+
+	ret = GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_PIN,(void *)&base_inited, &handle);
+
+with:
+
+	handle = GetModuleHandle((void *)&base_inited); ret = 1;
+
+and:
+
+	ret = GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_PIN, handlersym.sym, &handle);
+
+with:
+
+	handle = GetModuleHandle(handlersym.sym); ret = 1;
+
+Edit "crypto/bio/b_addr.c" and insert following line after "#include" files:
+
+	#undef AI_PASSIVE
+
+Finally build the library:
+
+	make depend
+	make
+	make install
+
+
+
+4. Download and compile LibEvent
+--------------------------------
+
+Download LibEvent source from:
+
+	https://github.com/libevent/libevent/releases/download/release-2.1.8-stable/libevent-2.1.8-stable.tar.gz
+
+Copy LibEvent tarball into "AdvOR" directory and build it:
+
+	cd AdvOR
+	tar zxf libevent-2.1.8-stable.tar.gz
+	cd libevent-2.1.8-stable
+	./configure --enable-static --disable-shared
+
+Edit "config.h" and comment out following line:
+
+	#define HAVE_SYS_TIME_H 1
+
+Finally build the library:
+
+	make
+	make install
+
+
+
+5. Download and compile LibNTLM
+-------------------------------
+
+Download LibNTLM source from:
+
+	https://download-mirror.savannah.gnu.org/releases/libntlm/libntlm-1.4.tar.gz
+
+Copy LibNTLM tarball into "AdvOR" directory and build it:
+
+	cd AdvOR
+	tar zxf libntlm-1.4.tar.gz
+	cd libntlm-1.4
+	./configure --enable-static --disable-shared
+	make
+	make install
+
+
+
+6. Finally compile AdvOR.exe
+----------------------------
+
+Download latest AdvOR source from:
+
+	https://github.com/AdvOR/advor/releases
+
+Extract advor-0.3.2.0-src.zip into "AdvOR" directory and build it:
+
+	cd AdvOR
+	make
+	strip AdvOR.exe
+
+
+
+AdvOR on GitHub
+---------------
+
+Visit for more information:
+
+	https://github.com/AdvOR
+	https://github.com/AdvOR/advor
+	https://github.com/AdvOR/advor/issues

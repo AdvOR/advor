@@ -175,7 +175,7 @@ void drawGraph(HWND hWnd)
 		DeleteDC(hMemDC);
 	}
 	if(bmpbits)
-	{	for(l=0;last_max>>l!=0;l++)	;
+	{	{ for(l=0;last_max>>l!=0;l++)	; }
 		memPtr=bmpbits;k=stats_idx;
 		for(i=0;i<128;i++)
 		{	draw_bw_read[i]=(stats_bw_read[(i+k)&0x7f]<<6)>>l;
@@ -480,7 +480,8 @@ void tree_show_sel(HTREEITEM hItem,LPARAM lParam)
 					if(uptime>60){	tor_snprintf(s1,100,get_lang_str(LANG_NETINFO_ROUTER_UPTIME_MINUTES),uptime/60);uptime%=60;s1 += strlen(s1);}
 					tor_snprintf(s1,100,get_lang_str(LANG_NETINFO_ROUTER_UPTIME_SECONDS),uptime);s1 += strlen(s1);
 				}
-				else tor_snprintf(s1,100,get_lang_str(LANG_NETINFO_ROUTER_LOW_UPTIME),ri->uptime);s1 += strlen(s1);
+				else { tor_snprintf(s1,100,get_lang_str(LANG_NETINFO_ROUTER_LOW_UPTIME),ri->uptime); }
+				s1 += strlen(s1);
 				tor_snprintf(s1,100,get_lang_str(LANG_NETINFO_ROUTER_LAST_TIME_REACHED));s1 += strlen(s1);format_iso_time(s1,ri->last_reachable);s1+=strlen(s1);
 				tor_snprintf(s1,100,get_lang_str(LANG_NETINFO_ROUTER_REACHABILITY_TEST_SINCE));s1 += strlen(s1);format_iso_time(s1,ri->testing_since);s1+=strlen(s1);*s1++=13;*s1++=10;*s1=0;
 				if(ri->contact_info){	tor_snprintf(s1,100,get_lang_str(LANG_NETINFO_ROUTER_CONTACT_INFO),ri->contact_info);s1 += strlen(s1);}

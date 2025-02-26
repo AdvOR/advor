@@ -872,7 +872,7 @@ routerstatus_t *
 router_pick_directory_server(authority_type_t type, int flags)
 {
   routerstatus_t *choice;
-  if ((get_options()->TunnelDirConns & 2) != 0)
+  if ((get_options()->TunnelDirConns2 & 2) != 0)
     flags |= _PDS_PREFER_TUNNELED_DIR_CONNS;
 
   if (!routerlist)
@@ -976,7 +976,7 @@ router_pick_trusteddirserver(authority_type_t type, int flags)
 {
   routerstatus_t *choice;
   int busy = 0;
-  if ((get_options()->TunnelDirConns & 2) != 0)
+  if ((get_options()->TunnelDirConns2 & 2) != 0)
     flags |= _PDS_PREFER_TUNNELED_DIR_CONNS;
 
   choice = router_pick_trusteddirserver_impl(type, flags, &busy);

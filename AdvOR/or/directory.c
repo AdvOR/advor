@@ -746,7 +746,7 @@ directory_command_should_use_begindir(or_options_t *options,
     if (!fascist_firewall_allows_address_or(addr, or_port) ||
         directory_fetches_from_authorities(options))
       return 0; /* We're firewalled or are acting like a relay -- also no. */
-  if (!options->TunnelDirConns &&
+  if (!options->TunnelDirConns2 &&
       router_purpose != ROUTER_PURPOSE_BRIDGE)
     return 0; /* We prefer to avoid using begindir conns. Fine. */
   return 1;

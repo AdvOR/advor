@@ -40,7 +40,7 @@ geoip_get_as_ptr	PROTO	:DWORD
 msg1	db	'IP ranges: ',0
 msg2	db	13,10,'Resolved ranges from the fake "A1" country: ',0
 msg3	db	' out of ',0
-fname	db	'GeoIPCountryWhois.csv',0
+fname	db	'GeoIP.csv',0
 fname0	db	'geoip_c.h',0
 defc1	db	'??=Not Defined / Unallocated',0
 defc2	db	'A1',0,'Anonymous Proxy',0
@@ -621,7 +621,7 @@ geoip_get_as_ptr	PROC	uses ebx ecx edx ip_1:DWORD
 	.endw
 	mov	eax,edx
 	ret
-	include	..\or\geoip_as.h
+	include	..\AdvOR\or\geoip_as.h
 geoip_get_as_ptr	ENDP
 
 end	start

@@ -129,7 +129,7 @@ void __stdcall hide_all_thread(LPARAM lParam)
 									wsh = wshow;
 								}
 								else
-								{	for(wsh=wshow;wsh->next;wsh=wsh->next);
+								{	{for(wsh=wshow;wsh->next;wsh=wsh->next);}
 									wsh->next = tor_malloc_zero(sizeof(window_show_info));
 									wsh = wsh->next;
 								}

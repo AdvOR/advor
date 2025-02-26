@@ -1091,8 +1091,9 @@ void circuit_expire_all_circs(DWORD exclKey)
   circuit_t *circ;
   or_options_t *options = get_options();
   for (circ=global_circuitlist; circ; circ = circ->next) {
-    if (CIRCUIT_IS_ORIGIN(circ) && (!exclKey || (circ->exclKey==exclKey)) && !circ->marked_for_close)
+    if (CIRCUIT_IS_ORIGIN(circ) && (!exclKey || (circ->exclKey==exclKey)) && !circ->marked_for_close) {
       circ->timestamp_dirty = -options->MaxCircuitDirtiness;
+	}
       if(!circ->marked_for_close) circuit_mark_for_close(circ,END_CIRC_REASON_REQUESTED);
   }
   smartlist_t *conns = get_connection_array();

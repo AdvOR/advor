@@ -528,7 +528,7 @@ int __stdcall dlgfunc(HWND hDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
 		SetClassLong(hDlg,GCL_STYLE,GetClassLong(hDlg,GCL_STYLE)|CS_HREDRAW|CS_VREDRAW|CS_PARENTDC);
 		if(LangGetLanguage()) changeDialogStrings(hDlg,lang_dlg_main);
 		get_winver();
-		tor_snprintf(newname,200,"%s  %s by Albu Cristian, 2009-2017",exename,advtor_ver);
+		tor_snprintf(newname,200,"%s  %s by Albu Cristian, 2009-2025",exename,advtor_ver);
 		LangSetWindowText(hDlg,newname);
 		hIcon1=LoadIcon(hInstance,MAKEINTRESOURCE(9));
 		SendDlgItemMessage(hDlg,9,BM_SETIMAGE,IMAGE_ICON,(LPARAM)hIcon1);

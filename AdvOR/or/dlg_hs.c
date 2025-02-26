@@ -229,7 +229,8 @@ void insertService(rend_service_t *ptr)
 			while(idx<1023 && portStr[idx1]) servPorts[idx++]=portStr[idx1++];
 			servPorts[idx++]=',';
 		});
-		if(idx) idx--;servPorts[idx]=0;
+		if(idx) idx--;
+		servPorts[idx]=0;
 	}
 	lvit.iItem=SendDlgItemMessage(hDlgHiddenServices,19400,LVM_INSERTITEM,0,(LPARAM)&lvit);
 
@@ -252,7 +253,8 @@ void insertService(rend_service_t *ptr)
 		while(idx<1023 && portStr[idx1]) servPorts[idx++]=portStr[idx1++];
 		servPorts[idx++]=',';
 	});
-	if(idx) idx--;servPorts[idx]=0;
+	if(idx) idx--;
+	servPorts[idx]=0;
 	SendDlgItemMessage(hDlgHiddenServices,19400,LVM_SETITEM,0,(LPARAM)&lvit);
 
 	lvit.iSubItem=3;lvit.mask=LVIF_TEXT;
@@ -286,7 +288,8 @@ void showService(unsigned long serviceKey)
 			while(idx<1023 && portStr[idx1]) servPorts[idx++]=portStr[idx1++];
 			servPorts[idx++]=',';
 		});
-		if(idx) idx--;servPorts[idx]=0;
+		if(idx) idx--;
+		servPorts[idx]=0;
 	}
 	SetDlgItemText(hDlgHiddenServices,19100,servPorts);
 
@@ -305,7 +308,8 @@ void showService(unsigned long serviceKey)
 		while(idx<1023 && portStr[idx1]) servPorts[idx++]=portStr[idx1++];
 		servPorts[idx++]=',';
 	});
-	if(idx) idx--;servPorts[idx]=0;
+	if(idx) idx--;
+	servPorts[idx]=0;
 	SetDlgItemText(hDlgHiddenServices,19102,servPorts);
 
 	tor_snprintf(servPorts,1024,"%s.onion",ptr->service_id);

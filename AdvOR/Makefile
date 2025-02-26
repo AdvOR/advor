@@ -16,7 +16,7 @@
 
 # Copyright (c) 2001-2004, Roger Dingledine
 # Copyright (c) 2004-2006, Roger Dingledine, Nick Mathewson
-# Copyright (c) 2007-2015, The Tor Project, Inc.
+# Copyright (c) 2007-2025, The Tor Project, Inc.
 # See LICENSE for licensing information
 
 
@@ -187,13 +187,13 @@ AM_DEFAULT_VERBOSITY = 0
 AR = ar
 AWK = gawk
 BINDIR = /usr/local/bin
-CC = gcc -std=gnu99
+CC = gcc -std=gnu99 -static
 CFLAGS = -g -O2 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fstack-protector-all -Wstack-protector --param ssp-buffer-size=1 -fasynchronous-unwind-tables -Wall -fno-strict-aliasing -Waddress -Warray-bounds -Wdate-time -Wdouble-promotion -Wextra -Wfloat-conversion -Winit-self -Wlogical-op -Wmissing-field-initializers -Wmissing-noreturn -Wnormalized=id -Woverlength-strings -Woverride-init -Wshadow -Wstrict-overflow=1 -Wsuggest-attribute=noreturn -Wsync-nand -Wtrampolines -Wunused-but-set-parameter -Wunused-but-set-variable -Wunused-local-typedefs -Wvariadic-macros -W -Wfloat-equal -Wundef -Wpointer-arith -Wstrict-prototypes -Wmissing-prototypes -Wwrite-strings -Wredundant-decls -Wchar-subscripts -Wcomment -Wformat=2 -Wwrite-strings -Wnested-externs -Wbad-function-cast -Wswitch-enum -Waggregate-return -Wpacked -Wunused -Wunused-parameter  -Wold-style-definition -Wmissing-declarations
-#CFLAGS = -g -O2 -Wall
+#CFLAGS = -Wall -g3
 CFLAGS_BUGTRAP =   
 CFLAGS_CONSTTIME = -fwrapv
 CPP = gcc -E
-CPPFLAGS =  -I${top_srcdir}/common
+CPPFLAGS = -I${top_srcdir}/common -I/usr/local/include
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 ECHO_C = 
@@ -205,7 +205,7 @@ GREP = /bin/grep
 INSTALL = /bin/install -c
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
-LDFLAGS =  -Wl,--nxcompat -Wl,--dynamicbase
+LDFLAGS = -L/usr/local/lib -Wl,--nxcompat -Wl,--dynamicbase
 LIBOBJS = 
 LIBS = 
 LOCALSTATEDIR = /usr/local/var
@@ -225,18 +225,18 @@ ac_ct_CC = gcc
 am__include = include
 am__tar = $${TAR-tar} chof - "$$tardir"
 am__untar = $${TAR-tar} xf -
+prefix = /usr/local
+exec_prefix = /usr/local
 bindir = ${exec_prefix}/bin
 build = i686-pc-mingw32
-datadir = ${datarootdir}
 datarootdir = ${prefix}/share
-exec_prefix = /usr/local
+datadir = ${datarootdir}
 includedir = ${prefix}/include
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localstatedir = ${prefix}/var
 mkdir_p = $(MKDIR_P)
 oldincludedir = /usr/include
-prefix = /usr/local
 program_transform_name = s,x,x,
 sbindir = ${exec_prefix}/sbin
 sharedstatedir = ${prefix}/com

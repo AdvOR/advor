@@ -272,8 +272,8 @@ int __stdcall dlgBridges(HWND hDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			EnableWindow(GetDlgItem(hDlg,24100),0);
 		}
 		if(tmpOptions->UpdateBridgesFromAuthority){ CheckDlgButton(hDlg,24401,BST_CHECKED);}
-		if((tmpOptions->TunnelDirConns & 1) != 0)
-		{	if((tmpOptions->TunnelDirConns & 2) != 0)	CheckDlgButton(hDlg,24402,BST_CHECKED);
+		if((tmpOptions->TunnelDirConns2 & 1) != 0)
+		{	if((tmpOptions->TunnelDirConns2 & 2) != 0)	CheckDlgButton(hDlg,24402,BST_CHECKED);
 			else						CheckDlgButton(hDlg,24402,BST_INDETERMINATE);
 		}
 		if(tmpOptions->AllDirActionsPrivate) CheckDlgButton(hDlg,24404,BST_CHECKED);
@@ -366,9 +366,9 @@ int __stdcall dlgBridges(HWND hDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
 		}
 		else if(LOWORD(wParam)==24402)
 		{	int i = IsDlgButtonChecked(hDlg,24402);
-			if(i==BST_CHECKED)		tmpOptions->TunnelDirConns = 3;
-			else if(i == BST_INDETERMINATE)	tmpOptions->TunnelDirConns = 1;
-			else				tmpOptions->TunnelDirConns = 0;
+			if(i==BST_CHECKED)		tmpOptions->TunnelDirConns2 = 3;
+			else if(i == BST_INDETERMINATE)	tmpOptions->TunnelDirConns2 = 1;
+			else				tmpOptions->TunnelDirConns2 = 0;
 		}
 		else if((LOWORD(wParam)==24101)&&(HIWORD(wParam)==EN_CHANGE))
 		{	int tmpsize=SendDlgItemMessage(hDlg,24101,WM_GETTEXTLENGTH,0,0);

@@ -16,9 +16,9 @@ const char log_c_id[] = "$Id: log.c 14222 2008-03-27 17:25:49Z weasel $";
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
+//#ifdef HAVE_SYS_TIME_H
+//#include <sys/time.h>
+//#endif
 #ifdef HAVE_TIME_H
 #include <time.h>
 #endif

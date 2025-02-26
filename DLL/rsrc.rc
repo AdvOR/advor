@@ -48,9 +48,9 @@ BEGIN
       VALUE "FileVersion", "3.0.3.0\0"
       VALUE "ProductVersion", "3.0.3.0\0"
       VALUE "CompanyName", "Albu Cristian\0"
-      VALUE "FileDescription", "Advanced Onion Router Winsock hook library\0"
+      VALUE "FileDescription", "Advanced Onion Router WinSock Hook Library\0"
       VALUE "InternalName", "AdvOR\0"
-      VALUE "LegalCopyright", "Copyright © by Albu Cristian, 2009-2017\0"
+      VALUE "LegalCopyright", "Copyright © by Albu Cristian, 2009-2025\0"
       VALUE "OriginalFilename", "AdvOR.dll\0"
       VALUE "ProductName", "Advanced Onion Router\0"
     END

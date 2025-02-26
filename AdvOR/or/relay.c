@@ -771,7 +771,9 @@ connection_ap_process_end_not_open(
 #ifdef int3
         if(get_options()->MaxCircuitDirtiness)
 #endif 
+		{
           circ->_base.timestamp_dirty -= get_options()->MaxCircuitDirtiness;
+		}
 
           if (conn->chosen_exit_optional) {
             /* stop wanting a specific exit */

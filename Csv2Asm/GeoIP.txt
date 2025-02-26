@@ -64,5 +64,3 @@ permission of the RIPE NCC on behalf of the copyright holders. Any use of this
 material to target advertising or similar activities is explicitly forbidden and
 may be prosecuted. The RIPE NCC requests to be notified of any such activities
 or suspicions thereof."
-
-Download link: http://www.maxmind.com/download/geoip/database/GeoIPCountryCSV.zip

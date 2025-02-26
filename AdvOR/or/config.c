@@ -361,7 +361,7 @@ static config_var_t _option_vars[] = {
   OBSOLETE("TrafficShaping"),
   V(TransListenAddress,          LINELIST, NULL),
   V(TransPort,                   PORT,     "0"),
-  V(TunnelDirConns,              UINT,     "3"),
+  V(TunnelDirConns2,             UINT,     "0"),
   V(UpdateBridgesFromAuthority,  BOOL,     "0"),
   V(UseBridges,                  BOOL,     "0"),
   V(UseEntryGuards,              BOOL,     "1"),
@@ -2298,7 +2298,7 @@ config_assign(config_format_t *fmt, void *options, config_line_t *list,
   if(section)
   {	while(list)
   	{	if(list->key[0]=='[')
-		{	for(i=0;list->key[i]>32;i++);
+		{	{ for(i=0;list->key[i]>32;i++); }
 			if(i) list->key[i]=0;
 			if(strcmp(section,(char *)list->key)==0)
 			{	list=list->next;break;}
