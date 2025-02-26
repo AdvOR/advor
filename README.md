@@ -1,7 +1,7 @@
 Advanced Onion Router client and server written by Albu Cristian, brought here for volunteers to carry on the project.
 
-Latest unofficial version: 0.3.2.0
-Latest official version: 0.3.1.3
+* Latest unofficial version: 0.3.2.0
+* Latest official version: 0.3.1.3
 
 Known issues:
 
