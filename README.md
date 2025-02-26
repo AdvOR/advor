@@ -8,3 +8,7 @@ Known issues:
 * As of 2025 Tor network requires stronger encryption methods, Tor currently included with AdvOR is heavily outdated
 * "OR network" > "Bypass ISP filtering" > "Use encrypted directory connections" needs to be unchecked
 * Option "TunnelDirConns" in AdvOR.ini was renamed to "TunnelDirConns2" and defaults to 0
+
+Tor status by Team Elite:
+
+https://te-home.net/?do=work&id=advor&page=status
