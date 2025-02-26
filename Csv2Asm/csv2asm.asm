@@ -16,7 +16,8 @@ includelib	\masm32\lib\shell32.lib
 geoip_get_as_ptr	PROTO	:DWORD
 
 .data?
-	tzara	dd	2*8*10240 dup(?)
+				;2*8*10240
+	tzara	dd	2024000 dup(?)
 	h1	dd	?
 	fsize	dd	?
 	bread	dd	?
@@ -30,11 +31,12 @@ geoip_get_as_ptr	PROTO	:DWORD
 	txt_size dd	?
 	max_tzari dd	?
 	max_coduri dd	?
-	buffer1	db	16384000 dup(?)
-	buffer2	db	16384000 dup(?)
-	buffer3	db	16384000 dup(?)
-	buffer4	db	16384000 dup(?)
-	buffer5	db	16384000 dup(?)
+				;16384000
+	buffer1	db	176384000 dup(?)
+	buffer2	db	176384000 dup(?)
+	buffer3	db	176384000 dup(?)
+	buffer4	db	176384000 dup(?)
+	buffer5	db	176384000 dup(?)
 
 .code
 msg1	db	'IP ranges: ',0

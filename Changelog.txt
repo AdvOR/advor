@@ -2,7 +2,7 @@
 
 - as2asm.exe and csv2asm.exe were recompiled with latest version of Masm32
 - geoip_as.h was updated with aggr.html released on 2025-02-25
-- geoip_c.h was updated with GeoIP.csv released on 2025-02-22
+- geoip_c.h was updated with GeoIP.csv released on 2025-02-25
 - OpenSSL library was updated to 1.1.1w
 - zLib library was updated to 1.3.1
 - Updated directory authorities according to https://metrics.torproject.org/rs.html#search/flag:Authority
